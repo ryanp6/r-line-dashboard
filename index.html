@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>R-Line — Objection Handling Dashboard</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#06b6d4;--muted:#9aa7b2;--white:#ecf0f3}
+    body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;margin:0;background:linear-gradient(180deg,#071028 0%, #071827 100%);color:var(--white);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .wrap{max-width:980px;width:100%}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+    h1{font-size:20px;margin:0}
+    p.lead{margin:6px 0 0;color:var(--muted);font-size:13px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+    .card{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 6px 18px rgba(2,6,23,.6)}
+    button.btn{display:inline-flex;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;border:0;background:linear-gradient(90deg,rgba(6,182,212,.12),transparent);color:var(--white);cursor:pointer}
+    .ob-title{font-weight:600;font-size:15px}
+    .script{margin-top:10px;background:rgba(255,255,255,0.03);padding:10px;border-radius:8px;font-size:14px;line-height:1.35;color:var(--white)}
+    .actions{margin-top:10px;display:flex;gap:8px}
+    .tiny{font-size:13px;padding:8px 10px;border-radius:8px;border:0;cursor:pointer}
+    .copy{background:rgba(6,182,212,.12);}
+    .insert{background:rgba(99,102,241,.12)}
+    footer{margin-top:18px;color:var(--muted);font-size:13px}
+    .value-stack{margin-top:8px;color:var(--muted);font-size:13px}
+    .urgent{margin-top:8px;color:#fca5a5;font-weight:600}
+    pre{white-space:pre-wrap;margin:0;font-family:inherit}
+    @media (max-width:520px){header{flex-direction:column;align-items:flex-start} }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>R-Line — Objection Handling Dashboard</h1>
+        <p class="lead">Tap a button to reveal the exact script. Copy it into messages, CRM, or use live with customers.</p>
+      </div>
+      <div style="text-align:right;color:var(--muted)">
+        <div>Tone: Value > Price • Certainty • Urgency</div>
+        <div style="font-size:12px;margin-top:6px">For R-Line Plumbing & Heating Ltd — Domestic Bathrooms</div>
+      </div>
+    </header>
+
+    <div class="grid" id="buttons"></div>
+
+    <footer>
+      Pro tip: Use the <strong>"Copy"</strong> button to paste into your sales tool. Use <strong>"Insert"</strong> to autofill your CRM note field (if supported).
+    </footer>
+  </div>
+
+  <template id="card-template">
+    <div class="card">
+      <div class="ob-title"></div>
+      <div class="script" data-script></div>
+      <div class="value-stack" data-value></div>
+      <div class="urgent" data-urgency></div>
+      <div class="actions">
+        <button class="tiny copy" data-copy>Copy</button>
+        <button class="tiny insert" data-insert>Insert</button>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    const objections = [
+      {
+        id: 'too-expensive',
+        title: 'It\'s Too Expensive',
+        script: `Acknowledge: "I completely get wanting the best value—most customers felt the same at first."
+
+Reframe: "A bathroom is one of the most used spaces. Cheap jobs cost more over time — you end up repairing or replacing. We build it once so it lasts." 
+
+Close: "We\'ve locked supplier prices for this month. If you book today we secure your rate. Shall I get a date in the diary?"`,
+        value: `Value Stack:\n• Premium fixtures & materials built to last decades.\n• Precision installation = no leaks or hidden costs.\n• Adds property value.\n• Luxury experience every day.`,
+        urgency: `Urgency: Supplier prices locked this month — estimated +7% next month.`
+      },
+
+      {
+        id: 'think-about-it',
+        title: 'I Need to Think About It',
+        script: `Acknowledge: "Of course — it\'s an important decision."
+
+Reframe: "People wait because of uncertainty. If I answer your questions now, you can decide today." 
+
+Close: "We\'re almost fully booked for the next 8 weeks. I can pencil you in now; cancel within 48 hours at no penalty."`,
+        value: `Value Stack:\n• Lock today\'s material price.\n• Priority slot before busy season.\n• We manage design to finish.`,
+        urgency: `Urgency: Near-capacity booking — delaying pushes you into the next cycle.`
+      },
+
+      {
+        id: 'can-you-do-it-cheaper',
+        title: 'Can You Do It Cheaper?',
+        script: `Acknowledge: "If we cut price we\'d cut quality — that\'s not R-Line." 
+
+Reframe: "This will still look & work like new in 10+ years. Cheaper jobs often cost more in repairs." 
+
+Close: "Our fixed price guarantee protects you even if costs rise during the build. Want to secure it?"`,
+        value: `Value Stack:\n• Lifetime installation guarantee.\n• Premium-brand warranties.\n• Zero corner-cutting = peace of mind.`,
+        urgency: `Urgency: Fixed-price protection available when you commit now.`
+      },
+
+      {
+        id: 'getting-other-quotes',
+        title: 'I\'m Getting Other Quotes',
+        script: `Acknowledge: "Good — comparing helps you see the difference." 
+
+Reframe: "We welcome comparisons. No one matches our blend of quality, guarantee & service." 
+
+Close: "Let\'s lock your date; if another company beats us like-for-like we\'ll match it."`,
+        value: `Value Stack:\n• Accredited installers & full insurance.\n• High-spec materials only.\n• Dedicated project manager.`,
+        urgency: `Urgency: True like-for-like comparisons take time — booking slots fill while you wait.`
+      },
+
+      {
+        id: 'not-right-time',
+        title: 'It\'s Not the Right Time',
+        script: `Acknowledge: "Timing matters — I hear you." 
+
+Reframe: "Delaying means living longer with a bathroom you don\'t love and risking higher future costs." 
+
+Close: "We can book now and start later — your slot and price are secured. Want me to reserve one?"`,
+        value: `Value Stack:\n• Finance options to spread cost.\n• Book now, start later — secure price & slot.\n• Quick turnaround options available.`,
+        urgency: `Urgency: Only 2 premium bathroom slots left this month.`
+      }
+    ];
+
+    const grid = document.getElementById('buttons');
+    const tpl = document.getElementById('card-template');
+
+    objections.forEach(o => {
+      const el = tpl.content.cloneNode(true);
+      el.querySelector('.ob-title').textContent = o.title;
+      el.querySelector('[data-script]').innerHTML = '<pre>' + o.script + '</pre>';
+      el.querySelector('[data-value]').innerHTML = o.value.replace(/\\n/g,'<br>');
+      el.querySelector('[data-urgency]').textContent = o.urgency;
+
+      const copyBtn = el.querySelector('[data-copy]');
+      const insertBtn = el.querySelector('[data-insert]');
+
+      copyBtn.addEventListener('click', async () => {
+        const text = `${o.title}\n\n${o.script}\n\n${o.value}\n\n${o.urgency}`;
+        await navigator.clipboard.writeText(text);
+        copyBtn.textContent = 'Copied ✓';
+        setTimeout(()=>copyBtn.textContent='Copy',1500);
+      });
+
+      insertBtn.addEventListener('click', ()=>{
+        // Basic insert behaviour: open a new email draft + paste (limited by browser)
+        const text = `${o.title} - ${o.script} ${o.value} ${o.urgency}`;
+        alert('Insert: copy the script below and paste into your CRM note or message.\n\n' + text);
+      });
+
+      grid.appendChild(el);
+    });
+  </script>
+</body>
+</html>
